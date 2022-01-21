@@ -1,6 +1,14 @@
 import cases from 'jest-in-case';
 import { not, min, max, between, email, url, required } from '$lib/validators';
-import type { FieldValidation } from '$lib';
+import type { FieldValidation, Validator } from '$lib';
+
+function createCustomAsyncValidator(): Validator {
+  return (value: any): Promise<FieldValidation> => {
+    return new Promise(resolve => {
+      process.nextTick(() => resolve({ valid: true, name: 'my_custom_async_validator' }))
+    })
+  }
+}
 
 cases(
 	'matchField(fieldStore)',
@@ -28,6 +36,8 @@ cases(
 		'is not required': { value: '', validator: required(), expected: true },
 		'is required': { value: 'test', validator: required(), expected: false },
 
-		'not not required': { value: 'test', validator: not(required()), expected: true }
+		'not not required': { value: 'test', validator: not(required()), expected: true },
+
+    'async validator': { value: 'test', validator: createCustomAsyncValidator(), expected: false }
 	}
 );
